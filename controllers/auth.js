@@ -20,7 +20,7 @@ const crearUsuarios= async(req= request,res= response) =>{
         const salt = bcrypt.genSaltSync();
         usuarioDB.password = bcrypt.hashSync( password ,salt);
         //create JWT for clients
-        const token = await generarJwt(usuarioDB.id,name);
+        const token = await generarJwt(usuarioDB.id,name,email);
         //create user in DB
         await usuarioDB.save();
         //generate ok response 
@@ -28,6 +28,7 @@ const crearUsuarios= async(req= request,res= response) =>{
             ok: true,
             uid: usuarioDB.id,
             name,
+            email,
             token
         })
     }catch(error){
@@ -60,12 +61,13 @@ const loginUsuario= async(req= request,res= response) =>{
                 mgs: "error de credenciales"
             });
         }
-        const token = await generarJwt(usuario.id,usuario.name);
+        const token = await generarJwt(usuario.id,usuario.name,email);
 
         return res.status(200).json({
             ok: true,
             uid: usuario.id,
             name: usuario.name,
+            email,
             token
             });
         
@@ -80,11 +82,14 @@ const loginUsuario= async(req= request,res= response) =>{
 }
 
 const refreshJWT= async(req= request,res= response) =>{
-    const{uid,name} = req;
-    const token = await generarJwt(uid,name);
+    const{uid} = req;
+    const dbUser = await Usuario.findById(uid);
+    const {name,email} = dbUser;
+    const token = await generarJwt(uid,name,email);
     return res.json({
         ok: true,
         uid,
+        email,
         name,
         token
     });
