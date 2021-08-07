@@ -4,7 +4,9 @@ const express = require('express');
 const cors= require('cors');
 const app = express();
 const port =process.env.PORT;
-
+//database connection
+const {dbConnection} = require('./db/config');
+dbConnection();
 //directorio publico
 app.use( express.static("public"));
 // CORS
